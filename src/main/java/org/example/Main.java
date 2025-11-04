@@ -7,6 +7,8 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -14,17 +16,19 @@ import java.util.Scanner;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
+
         try{
             System.out.print("Введите дату начала загрузки ");
             Scanner sIn = new Scanner(System.in);
-            Date filterMinLoadDate, filterMaxLoadDate;
-            DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+            LocalDate filterMinLoadDate, filterMaxLoadDate;
+
+            DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             while (true)
             {
                 try {
-                    filterMinLoadDate = formatter.parse(sIn.nextLine());
+                    filterMinLoadDate = LocalDate.parse(sIn.nextLine(), DATE_FORMATTER);
                     break;
-                } catch (ParseException e) {
+                } catch (Exception e) {
                     System.out.println("Ошибка ввода даты");
                 }
             }
@@ -32,8 +36,8 @@ public class Main {
             {
                 System.out.print("Введите дату конца загрузки ");
                 try {
-                    filterMaxLoadDate = formatter.parse(sIn.nextLine());
-                    if (filterMaxLoadDate.after(filterMinLoadDate))
+                    filterMaxLoadDate = LocalDate.parse(sIn.nextLine(), DATE_FORMATTER);
+                    if (!(filterMaxLoadDate.isBefore(filterMinLoadDate)))
                         break;
                     else
                         throw new Exception("Ошибка! Дата конца загрузки должна быть больше начала");
@@ -45,6 +49,10 @@ public class Main {
                     System.out.println(e);
                 }
             }
+
+
+            DataProcessingService service = new DataProcessingService();
+            service.processData(filterMinLoadDate, filterMaxLoadDate);
 
             URL url = new URL("https://budget.gov.ru/epbs/registry/ubpandnubp/data");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
